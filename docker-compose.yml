@@ -1,0 +1,21 @@
+version: "3.8"
+
+services:
+  db:
+    image: postgres
+    environment:
+      - POSTGRES_DB=votes
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+  svc:
+    build:
+      context: .
+      target: local
+    command: ["./wait-for-postgres.sh"]
+    env_file:
+      - .env
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+
