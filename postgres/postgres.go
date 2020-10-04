@@ -17,12 +17,12 @@ const (
 
 // Connect creates a new connection to a postgres db.
 func Connect(host string, port int, user, passwd, dbname, ssl string) (db *sql.DB, close func() error, err error) {
-	sslmode := "require"
+	sslmode := ""
 	if ssl != "" {
-		sslmode = ssl
+		sslmode = fmt.Sprintf("sslmode:%s", ssl)
 	}
 	source := fmt.Sprintf("host=%s port=%d user=%s "+
-		"password=%s dbname=%s sslmode=%s",
+		"password=%s dbname=%s %s",
 		host, port, user, passwd, dbname, sslmode)
 	db, err = sql.Open(postgresDriver, source)
 	if err != nil {

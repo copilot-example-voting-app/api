@@ -79,7 +79,7 @@ Resources:
       Name: !Join [ '/', [ !Ref App, !Ref Env, !Ref Name, 'aurora-pg' ] ]
       Description: !Join [ '', [ 'Aurora PostgreSQL Master User Secret ', 'for CloudFormation Stack ', !Ref 'AWS::StackName' ] ]
       GenerateSecretString:
-        SecretStringTemplate: "{\"username\": \"admin\"}"
+        SecretStringTemplate: '{"username": "postgres"}'
         GenerateStringKey: "password"
         ExcludeCharacters: '"@/\'
         PasswordLength: 16
@@ -108,14 +108,14 @@ Resources:
         - !Ref ClusterSecurityGroup
       ScalingConfiguration:
         AutoPause: true
-        MinCapacity: 1
-        MaxCapacity: 10
+        MinCapacity: 2
+        MaxCapacity: 8
         SecondsUntilAutoPause: 1000
 
 Outputs:
   RdsEndpoint: # injected as RDS_ENDPOINT environment variable by Copilot.
     Description: 'The connection endpoint for the DB cluster.'
-    Value: !GetAtt 'DBCluster.Endpoint.Address'
+    Value: !GetAtt 'AuroraDBCluster.Endpoint.Address'
 
   RdsSecret: # injected as RDS_SECRET environment variable by Copilot.
     Description: 'The secret that username and password.'
