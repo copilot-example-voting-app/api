@@ -2,12 +2,13 @@
 package server
 
 import (
-	"api/vote"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"log"
 	"net/http"
+
+	"github.com/copilot-example-voting-app/api/vote"
 
 	"github.com/gorilla/mux"
 )

@@ -2,9 +2,6 @@
 package api
 
 import (
-	"api/postgres"
-	"api/server"
-	"api/vote"
 	"encoding/json"
 	"flag"
 	"fmt"
@@ -12,6 +9,10 @@ import (
 	"net/http"
 	"os"
 	"time"
+
+	"github.com/copilot-example-voting-app/api/postgres"
+	"github.com/copilot-example-voting-app/api/server"
+	"github.com/copilot-example-voting-app/api/vote"
 
 	"github.com/gorilla/mux"
 )

@@ -1,8 +1,9 @@
 package main
 
 import (
-	"api"
 	"log"
+
+	"github.com/copilot-example-voting-app/api"
 )
 
 func main() {
@@ -10,5 +11,3 @@ func main() {
 		log.Fatalf("run api server: %v\n", err)
 	}
 }
-
-
