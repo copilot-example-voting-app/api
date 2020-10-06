@@ -19,7 +19,7 @@ const (
 func Connect(host string, port int, user, passwd, dbname, ssl string) (db *sql.DB, close func() error, err error) {
 	sslmode := ""
 	if ssl != "" {
-		sslmode = fmt.Sprintf("sslmode:%s", ssl)
+		sslmode = fmt.Sprintf("sslmode=%s", ssl)
 	}
 	source := fmt.Sprintf("host=%s port=%d user=%s "+
 		"password=%s dbname=%s %s",

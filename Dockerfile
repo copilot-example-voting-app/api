@@ -14,10 +14,12 @@ RUN go build -o api ./cmd/api
 # Target used by our compose file, we have to port wait-for-postgres.sh so that the containers come up in the proper order.
 FROM builder as local
 EXPOSE 8080
+HEALTHCHECK --interval=15s --timeout=10s --start-period=30s \
+  CMD curl -f http://localhost:8080/_healthcheck || exit 1
 CMD ["./api"]
 
 # For the real image, we'll only copy the binaryso that the image size is small.
-FROM gcr.io/distroless/base-debian10
+FROM builder
 COPY --from=builder /svc/api /
 EXPOSE 8080
 HEALTHCHECK --interval=15s --timeout=10s --start-period=30s \
