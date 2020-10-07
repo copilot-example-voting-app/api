@@ -22,9 +22,9 @@ image:
     start_period: 30s # Grace period within which to provide containers time to bootstrap before failed health checks count towards the maximum number of retries. Default is 0s.
 
 # Number of CPU units for the task.
-cpu: 256
+cpu: 1024
 # Amount of memory in MiB used by the task.
-memory: 512
+memory: 6144
 # Number of tasks that should be running in your service.
 count:
   range: 1-10
