@@ -57,6 +57,7 @@ phases:
           manifest=$(cat $CODEBUILD_SRC_DIR/copilot/$svc/manifest.yml | ruby -ryaml -rjson -e 'puts JSON.pretty_generate(YAML.load(ARGF))')
           image_location=$(echo $manifest | jq '.image.location')
           if [ -n "$image_location" ]; then
+            echo "skipping image building because location is provided";
             continue
           fi
           base_dockerfile=$(echo $manifest | jq '.image.build')
@@ -90,6 +91,7 @@ phases:
             region=$(echo $repo | cut -d'.' -f4);
             $(aws ecr get-login --no-include-email --region $region);
             docker tag $image_id $repo;
+            echo "pushing to" $repo;
             docker push $repo;
           done;
         done;
