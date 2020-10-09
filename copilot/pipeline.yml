@@ -15,7 +15,7 @@ source:
   # has the following properties: repository, branch.
   properties:
     access_token_secret: github-token-voting-app-api
-    branch: master
+    branch: main
     repository: https://github.com/copilot-example-voting-app/api
 
 # The deployment section defines the order the pipeline will deploy
