@@ -28,3 +28,10 @@ stages:
       # Optional: use test commands to validate this stage of your build.
       # test_commands: [echo 'running tests', make test]
 
+    - # The name of the environment to deploy to.
+      name: prod-iad
+      # Optional: flag for manual approval action before deployment.
+      requires_approval: true
+      # Optional: use test commands to validate this stage of your build.
+      # test_commands: [echo 'running tests', make test]
+
