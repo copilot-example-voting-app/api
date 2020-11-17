@@ -30,6 +30,8 @@ func Run() error {
 		return fmt.Errorf("api: unmarshal rds secret: %v", err)
 	}
 
+	fmt.Println("hello")
+
 	conn, close, err := postgres.Connect(
 		os.Getenv("RDS_ENDPOINT"),
 		postgres.Port,
