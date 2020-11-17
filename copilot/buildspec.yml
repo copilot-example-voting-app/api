@@ -56,7 +56,7 @@ phases:
             tmp=$(mktemp)
             timestamp=$(date +%s)
             aws s3 cp "$ADDONSFILE" "s3://stackset-voting-app-infr-pipelinebuiltartifactbuc-jhqu9hqlegms/manual/$timestamp/$workload.addons.stack.yml";
-            jq --arg a "https://stackset-voting-app-infr-pipelinebuiltartifactbuc-jhqu9hqlegms.s3-us-east-1.amazonaws.com/manual/$timestamp/$workload.addons.stack.yml" '.Parameters.AddonsTemplateURL = $a' ./infrastructure/$workload-prod-iad.params.json > "$tmp" && mv "$tmp" ./infrastructure/$workload-prod-iad.params.json
+            jq --arg a "https://stackset-voting-app-infr-pipelinebuiltartifactbuc-jhqu9hqlegms.s3.amazonaws.com/manual/$timestamp/$workload.addons.stack.yml" '.Parameters.AddonsTemplateURL = $a' ./infrastructure/$workload-prod-iad.params.json > "$tmp" && mv "$tmp" ./infrastructure/$workload-prod-iad.params.json
             aws s3 cp "$ADDONSFILE" "s3://stackset-voting-app-infr-pipelinebuiltartifactbuc-5s8f8pg52k7x/manual/$timestamp/$workload.addons.stack.yml";
             jq --arg a "https://stackset-voting-app-infr-pipelinebuiltartifactbuc-5s8f8pg52k7x.s3-us-west-2.amazonaws.com/manual/$timestamp/$workload.addons.stack.yml" '.Parameters.AddonsTemplateURL = $a' ./infrastructure/$workload-test.params.json > "$tmp" && mv "$tmp" ./infrastructure/$workload-test.params.json
           fi
