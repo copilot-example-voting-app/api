@@ -1,5 +1,9 @@
 # Buildspec runs in the build stage of your pipeline.
 version: 0.2
+env:
+  parameter-store:
+    DOCKER_USERNAME: DOCKER_USERNAME
+    DOCKER_PASSWD: DOCKER_PASSWD
 phases:
   install:
     runtime-versions:
@@ -20,6 +24,7 @@ phases:
     commands:
       - ls -l
       - export COLOR="false"
+      - docker login --username $DOCKER_USERNAME --password $DOCKER_PASSWD
       # First, upgrade the cloudformation stack of every environment.
       - ./copilot-linux env upgrade --all
       # Find all the local services in the workspace.
