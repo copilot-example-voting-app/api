@@ -9,8 +9,8 @@ phases:
       - echo "cd into $CODEBUILD_SRC_DIR"
       - cd $CODEBUILD_SRC_DIR
       # Download the copilot linux binary.
-      - wget https://ecs-cli-v2-release.s3.amazonaws.com/copilot-linux-v0.5.0
-      - mv ./copilot-linux-v0.5.0 ./copilot-linux
+      - wget https://ecs-cli-v2-release.s3.amazonaws.com/copilot-linux-v0.7.0
+      - mv ./copilot-linux-v0.7.0 ./copilot-linux
       - chmod +x ./copilot-linux
   build:
     commands:
@@ -20,6 +20,8 @@ phases:
     commands:
       - ls -l
       - export COLOR="false"
+      # First, upgrade the cloudformation stack of every environment.
+      - ./copilot-linux env upgrade --all
       # Find all the local services in the workspace.
       - svcs=$(./copilot-linux svc ls --local --json | jq '.services[].name' | sed 's/"//g')
       # Find all the local jobs in the workspace.
@@ -48,10 +50,10 @@ phases:
           if [ -f "$ADDONSFILE" ]; then
             tmp=$(mktemp)
             timestamp=$(date +%s)
-            aws s3 cp "$ADDONSFILE" "s3://stackset-voting-app-infr-pipelinebuiltartifactbuc-1qft2insmdy42/manual/$timestamp/$workload.addons.stack.yml";
-            jq --arg a "https://stackset-voting-app-infr-pipelinebuiltartifactbuc-1qft2insmdy42.s3-us-east-1.amazonaws.com/manual/$timestamp/$workload.addons.stack.yml" '.Parameters.AddonsTemplateURL = $a' ./infrastructure/$workload-prod-iad.params.json > "$tmp" && mv "$tmp" ./infrastructure/$workload-prod-iad.params.json
-            aws s3 cp "$ADDONSFILE" "s3://stackset-voting-app-infr-pipelinebuiltartifactbuc-1g03lu588clht/manual/$timestamp/$workload.addons.stack.yml";
-            jq --arg a "https://stackset-voting-app-infr-pipelinebuiltartifactbuc-1g03lu588clht.s3-us-west-2.amazonaws.com/manual/$timestamp/$workload.addons.stack.yml" '.Parameters.AddonsTemplateURL = $a' ./infrastructure/$workload-test.params.json > "$tmp" && mv "$tmp" ./infrastructure/$workload-test.params.json
+            aws s3 cp "$ADDONSFILE" "s3://stackset-voting-app-infr-pipelinebuiltartifactbuc-jhqu9hqlegms/manual/$timestamp/$workload.addons.stack.yml";
+            jq --arg a "https://stackset-voting-app-infr-pipelinebuiltartifactbuc-jhqu9hqlegms.s3-us-east-1.amazonaws.com/manual/$timestamp/$workload.addons.stack.yml" '.Parameters.AddonsTemplateURL = $a' ./infrastructure/$workload-prod-iad.params.json > "$tmp" && mv "$tmp" ./infrastructure/$workload-prod-iad.params.json
+            aws s3 cp "$ADDONSFILE" "s3://stackset-voting-app-infr-pipelinebuiltartifactbuc-5s8f8pg52k7x/manual/$timestamp/$workload.addons.stack.yml";
+            jq --arg a "https://stackset-voting-app-infr-pipelinebuiltartifactbuc-5s8f8pg52k7x.s3-us-west-2.amazonaws.com/manual/$timestamp/$workload.addons.stack.yml" '.Parameters.AddonsTemplateURL = $a' ./infrastructure/$workload-test.params.json > "$tmp" && mv "$tmp" ./infrastructure/$workload-test.params.json
           fi
         done;
       # Build images
