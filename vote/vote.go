@@ -5,12 +5,19 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"strings"
 )
 
 const (
 	// DBName is the name of the database for the votes API.
 	DBName = "votes"
 )
+
+// VoteInput represents a single vote request.
+type VoteInput struct {
+	VoterID string `json:"voter_id"`
+	Vote    string `json:"vote"`
+}
 
 // ResultCount is a pair of a vote result and the sum of votes for the result.
 type ResultCount struct {
@@ -20,7 +27,8 @@ type ResultCount struct {
 
 // DB is the interface for all the operations allowed on votes.
 type DB interface {
-	Store(voterID, vote string) error
+	Store(in VoteInput) error
+	BatchStore(in []VoteInput) error
 	Result(voterID string) (vote string, err error)
 	Results() (results []ResultCount, err error)
 }
@@ -43,15 +51,32 @@ type sqlDB struct {
 }
 
 // Store a vote in the database.
-func (db *sqlDB) Store(voterID, vote string) error {
-	_, err := db.conn.Exec(`INSERT INTO votes (id, vote) VALUES ($1, $2)`, voterID, vote)
+func (db *sqlDB) Store(in VoteInput) error {
+	_, err := db.conn.Exec(`INSERT INTO votes (id, vote) VALUES ($1, $2)`, in.VoterID, in.Vote)
 	if err == nil {
 		return nil
 	}
-	log.Printf("INFO: vote: update vote for voter id %s\n", voterID)
-	_, err = db.conn.Exec(`UPDATE votes SET vote = $1 WHERE id = $2`, vote, voterID)
+	log.Printf("INFO: vote: update vote for voter id %s\n", in.VoterID)
+	_, err = db.conn.Exec(`UPDATE votes SET vote = $1 WHERE id = $2`, in.Vote, in.VoterID)
 	if err != nil {
-		return fmt.Errorf("vote: store vote %s for voter id %s: %v", vote, voterID, err)
+		return fmt.Errorf("vote: store vote %s for voter id %s: %v", in.Vote, in.VoterID, err)
+	}
+	return nil
+}
+
+// BatchStore stores multiple votes in the database.
+func (db *sqlDB) BatchStore(votes []VoteInput) error {
+	var valueStrings []string
+	var valueArgs []interface{}
+	for i, vote := range votes {
+		valueStrings = append(valueStrings, fmt.Sprintf("($%d, $%d)", i*2+1, i*2+2))
+		valueArgs = append(valueArgs, vote.VoterID)
+		valueArgs = append(valueArgs, vote.Vote)
+	}
+	stmt := fmt.Sprintf("INSERT INTO votes (id, vote) VALUES %s",
+		strings.Join(valueStrings, ","))
+	if _, err := db.conn.Exec(stmt, valueArgs...); err != nil {
+		return fmt.Errorf("vote: store batch %d votes: %v", len(votes), err)
 	}
 	return nil
 }

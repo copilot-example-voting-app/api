@@ -23,6 +23,7 @@ type Server struct {
 func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	s.Router.HandleFunc("/_healthcheck", s.handleHealthCheck())
 	s.Router.HandleFunc("/votes", s.handleStoreVote()).Methods(http.MethodPost)
+	s.Router.HandleFunc("/votes/batch", s.handleBatchStoreVotes()).Methods(http.MethodPost)
 	s.Router.HandleFunc("/votes/{voterID}", s.handleGetVote()).Methods(http.MethodGet)
 	s.Router.HandleFunc("/results", s.handleGetResults()).Methods(http.MethodGet)
 
@@ -37,22 +38,50 @@ func (s *Server) handleHealthCheck() http.HandlerFunc {
 
 func (s *Server) handleStoreVote() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		data := struct {
-			VoterID string `json:"voter_id"`
-			Vote    string `json:"vote"`
-		}{}
+		var data vote.VoteInput
 		dec := json.NewDecoder(r.Body)
 		if err := dec.Decode(&data); err != nil {
 			log.Printf("ERROR: server: decode payload: %v\n", err)
 			http.Error(w, "decode JSON payload", http.StatusBadRequest)
 			return
 		}
-		if err := s.DB.Store(data.VoterID, data.Vote); err != nil {
+		if err := s.DB.Store(vote.VoteInput{VoterID: data.VoterID, Vote: data.Vote}); err != nil {
 			log.Printf("ERROR: server: store vote %+v: %v\n", data, err)
 			http.Error(w, fmt.Sprintf("store vote for voter ID %s", data.VoterID), http.StatusInternalServerError)
 			return
 		}
 		log.Printf("INFO: server: registered vote for voter ID %s\n", data.VoterID)
+		w.WriteHeader(http.StatusOK)
+	}
+}
+
+func (s *Server) handleBatchStoreVotes() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		data := struct {
+			Votes []vote.VoteInput `json:"votes"`
+		}{}
+		dec := json.NewDecoder(r.Body)
+		if err := dec.Decode(&data); err != nil {
+			log.Printf("ERROR: server: decode bulk votes payload: %v\n", err)
+			http.Error(w, "decode JSON bulk votes payload", http.StatusBadRequest)
+			return
+		}
+		if len(data.Votes) > 10 {
+			log.Printf("ERROR: server: cannot insert %d votes limit is 10\n", len(data.Votes))
+			http.Error(w, "cannot insert more than 10 votes", http.StatusBadRequest)
+			return
+		}
+		if len(data.Votes) == 0 {
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+
+		if err := s.DB.BatchStore(data.Votes); err != nil {
+			log.Printf("ERROR: server: batch store votes %v\n", err)
+			http.Error(w, "store batch votes", http.StatusInternalServerError)
+			return
+		}
+		log.Printf("INFO: server: registered %d votes\n", len(data.Votes))
 		w.WriteHeader(http.StatusOK)
 	}
 }
