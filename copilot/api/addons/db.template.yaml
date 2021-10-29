@@ -74,6 +74,8 @@ Resources:
         client_encoding: 'UTF8'
 
   AuroraMasterSecret:
+    Metadata:
+      'aws:copilot:description': 'A Secrets Manager secret to store your DB credentials'
     Type: AWS::SecretsManager::Secret
     Properties:
       Name: !Join [ '/', [ !Ref App, !Ref Env, !Ref Name, 'aurora-pg' ] ]
@@ -92,6 +94,8 @@ Resources:
       TargetType: AWS::RDS::DBCluster
 
   AuroraDBCluster:
+    Metadata:
+      'aws:copilot:description': 'The {{logicalIDSafe .ClusterName}} Aurora Serverless database cluster'
     Type: 'AWS::RDS::DBCluster'
     Properties:
       MasterUsername: !Join ['', ['{{resolve:secretsmanager:', !Ref AuroraMasterSecret, ':SecretString:username}}' ]]
